@@ -27,8 +27,6 @@ void findLargestAndSecondLargest(long long *arr, int size, long long& max1, int&
     }
 }
 
-
-
 int karmarkar_karp(long long * arr, int length) {
 
     for (int i = 0; i < length - 1; i++) {
@@ -54,7 +52,7 @@ int karmarkar_karp(long long * arr, int length) {
 int* random_sol(int length) {
     random_device rand_dev;
     mt19937 generator(rand_dev());
-    uniform_int_distribution<long long> dist(0, 1);
+    uniform_int_distribution<int> dist(0, 1);
     int* sol = new int[length];
     for (int i = 0; i < length; i++) {
         sol[i] = 1 - 2 * dist(generator);
@@ -71,8 +69,29 @@ long long standard_residue(int* sol, long long* A, int length) {
     return abs(sum);
 }
 
-// repeated_random algo for standard form solutions
-int repeated_random(long long* A, int length, int max_iter) {
+int* random_move(int* sol, int length) {
+    random_device rand_dev;
+    mt19937 generator(rand_dev());
+    uniform_int_distribution<int> dist1(0, length - 1);
+    uniform_int_distribution<int> dist2(0, 1);
+    // select two random indices i and j s.t. i!=j
+    int i = dist1(generator);
+    int j = dist1(generator);
+    while (true) {
+        int j = dist1(generator);
+        if (i != j) {
+            break;
+        }
+    }
+    sol[i] = -1 * sol[i];
+    int p = dist2(generator);
+    if (p == 1) {
+        sol[j] = -1 * sol[j];
+    }
+    return sol;
+}
+
+int repeated_random_standard(long long* A, int length, int max_iter) {
     long long sres = 0;
     long long s1res = 0;
     int* S = random_sol(length);
@@ -88,7 +107,53 @@ int repeated_random(long long* A, int length, int max_iter) {
     return sres;
 }
 
+int hill_climb_standard(long long* A, int length, int max_iter) {
+    long long sres = 0;
+    long long s1res = 0;
+    int* S = random_sol(length);
+    sres = standard_residue(S, A, length);
+    for (int i = 0; i < max_iter; i++) {
+        int* S1 = random_move(S, length);
+        s1res = standard_residue(S1, A, length);
+        if (s1res < sres) {
+            S = S1;
+            sres = s1res;
+        }
+    }
+    return sres;
+}
 
+int simulated_anneal_standard(long long* A, int length, int max_iter) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    // give "true" 1/4 of the time
+    // give "false" 3/4 of the time
+    long long sres = 0;
+    long long s1res = 0;
+    long long s2res = 0;
+    int* S = random_sol(length);
+    int* S2 = S; // this is unnecessary unless we want to return S2 itself and not s2res
+    sres = standard_residue(S, A, length);
+    s2res = sres;
+    for (int i = 0; i < max_iter; i++) {
+        int* S1 = random_move(S, length);
+        s1res = standard_residue(S1, A, length);
+        if (s1res < sres) {
+            S = S1;
+            sres = s1res;
+        } else {
+            std::bernoulli_distribution d(exp(-1.*(float(S1-S))/float(i)));
+            if (d(gen)) {
+                S = S1;
+                sres = s1res;
+            } if (sres < s2res) {
+                S2 = S;
+                s2res = sres;
+            }
+        }
+    }
+    return s2res;
+}
 
 // partition flag algorithm inputfile
 int main(int _argc, char *argv[]) {
@@ -103,6 +168,20 @@ int main(int _argc, char *argv[]) {
         getline(input, val);
         A[i] = stoll(val);
     }
-    printf("%lli", karmarkar_karp(A, 100));
+    int max_iter = 10;
+    switch(algorithm) {
+        case 0:
+            printf("%lli", karmarkar_karp(A, 100));
+            break;
+        case 1:
+            printf("%lli", repeated_random_standard(A, 100, max_iter));
+            break;
+        case 2:
+            printf("%lli", hill_climb_standard(A, 100, max_iter));
+            break;
+        case 3:
+            printf("%lli", simulated_anneal_standard(A, 100, max_iter));
+            break;
+    }
     return 0;
 }
