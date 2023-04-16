@@ -91,7 +91,7 @@ int* random_move(int* sol, int length) {
     return sol;
 }
 
-int repeated_random_standard(long long* A, int length, int max_iter) {
+long long repeated_random_standard(long long* A, int length, int max_iter) {
     long long sres = 0;
     long long s1res = 0;
     int* S = random_sol(length);
@@ -107,7 +107,7 @@ int repeated_random_standard(long long* A, int length, int max_iter) {
     return sres;
 }
 
-int hill_climb_standard(long long* A, int length, int max_iter) {
+long long hill_climb_standard(long long* A, int length, int max_iter) {
     long long sres = 0;
     long long s1res = 0;
     int* S = random_sol(length);
@@ -123,7 +123,7 @@ int hill_climb_standard(long long* A, int length, int max_iter) {
     return sres;
 }
 
-int simulated_anneal_standard(long long* A, int length, int max_iter) {
+long long simulated_anneal_standard(long long* A, int length, int max_iter) {
     std::random_device rd;
     std::mt19937 gen(rd());
     // give "true" 1/4 of the time
