@@ -27,7 +27,7 @@ void findLargestAndSecondLargest(long long *arr, int size, long long& max1, int&
     }
 }
 
-int karmarkar_karp(long long * arr, int length) {
+long long karmarkar_karp(long long * arr, int length) {
 
     for (int i = 0; i < length - 1; i++) {
         long long max1;
@@ -126,13 +126,10 @@ long long hill_climb_standard(long long* A, int length, int max_iter) {
 long long simulated_anneal_standard(long long* A, int length, int max_iter) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    // give "true" 1/4 of the time
-    // give "false" 3/4 of the time
     long long sres = 0;
     long long s1res = 0;
     long long s2res = 0;
     int* S = random_sol(length);
-    int* S2 = S; // this is unnecessary unless we want to return S2 itself and not s2res
     sres = standard_residue(S, A, length);
     s2res = sres;
     for (int i = 0; i < max_iter; i++) {
@@ -142,12 +139,12 @@ long long simulated_anneal_standard(long long* A, int length, int max_iter) {
             S = S1;
             sres = s1res;
         } else {
-            std::bernoulli_distribution d(exp(-1.*(float(S1-S))/float(i)));
-            if (d(gen)) {
+            float p = exp((-1.*(s1res-sres))/(pow(10,10)*pow(0.8,floor(((float)i/300.)))));
+            std::bernoulli_distribution d(p);
+            if (d(gen)) { 
                 S = S1;
                 sres = s1res;
             } if (sres < s2res) {
-                S2 = S;
                 s2res = sres;
             }
         }
@@ -168,7 +165,7 @@ int main(int _argc, char *argv[]) {
         getline(input, val);
         A[i] = stoll(val);
     }
-    int max_iter = 10;
+    int max_iter = 10000;
     switch(algorithm) {
         case 0:
             printf("%lli", karmarkar_karp(A, 100));
