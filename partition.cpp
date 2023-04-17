@@ -27,6 +27,21 @@ void findLargestAndSecondLargest(long long *arr, int size, long long& max1, int&
     }
 }
 
+long long* prepartition(long long ret[], int p[], int size) {
+    for (int i = 0; i < size; i++) {
+        int p_i = p[i];
+        if (p_i != -1) {
+            for (int j = i+1; j < size; j++) {
+                if (p[i] == p[j]) {
+                    ret[i] = ret[i] + ret[j];
+                    ret[j] = 0;
+                    p[j] = -1;
+                }
+            }
+        }
+    }
+}
+
 long long karmarkar_karp(long long * arr, int length) {
 
     for (int i = 0; i < length - 1; i++) {
@@ -60,6 +75,19 @@ int* random_sol(int length) {
     return sol;
 }
 
+// generates random standard form solution of length "length"
+int* random_sol_prepartition(int length) {
+    random_device rand_dev;
+    mt19937 generator(rand_dev());
+    uniform_int_distribution<int> dist(1,length);
+    int* sol = new int[length];
+    for (int i = 0; i < length; i++) {
+        sol[i] = dist(generator);
+    }
+    return sol;
+}
+
+
 // calculates residue of standard form solution
 long long standard_residue(int* sol, long long* A, int length) {
     long long sum = 0;
@@ -92,6 +120,37 @@ int* random_move(int* sol, int length) {
 }
 
 long long repeated_random_standard(long long* A, int length, int max_iter) {
+    long long ret[length];
+    for (int i = 0; i < length; i++) {
+        ret[i] = A[i];
+    }
+
+    long long sres = 0;
+    long long s1res = 0;
+
+    int* p = random_sol_prepartition(length);
+    prepartition(ret, p, length);
+    sres = karmarkar_karp(ret, length);
+
+    for (int i = 0; i < max_iter; i++) {
+        int* S1 = random_sol_prepartition(length);
+
+        for (int j = 0; j < length; j++) {
+            ret[j] = A[j];
+        }
+
+        prepartition(ret, S1, length);
+
+        s1res = karmarkar_karp(ret, length);
+        if (s1res < sres) {
+            p = S1;
+            sres = s1res;
+        }
+    }
+    return sres;
+}
+
+long long repeated_random_prepartition(long long* A, int length, int max_iter) {
     long long sres = 0;
     long long s1res = 0;
     int* S = random_sol(length);
@@ -106,6 +165,7 @@ long long repeated_random_standard(long long* A, int length, int max_iter) {
     }
     return sres;
 }
+
 
 long long hill_climb_standard(long long* A, int length, int max_iter) {
     long long sres = 0;
@@ -152,20 +212,6 @@ long long simulated_anneal_standard(long long* A, int length, int max_iter) {
     return s2res;
 }
 
-void prepartition(long long arr[], int p[], int size) {
-    for (int i = 0; i < size; i++) {
-        int p_i = p[i];
-        if (p_i != -1) {
-            for (int j = i+1; j < size; j++) {
-                if (p[i] == p[j]) {
-                    arr[i] += arr[j];
-                    arr[j] = 0;
-                    p[j] = -1;
-                }
-            }
-        }
-    }
-}
 
 
 // partition flag algorithm inputfile
@@ -195,15 +241,20 @@ int main(int _argc, char *argv[]) {
         case 3:
             printf("%lli", simulated_anneal_standard(A, 100, max_iter));
             break;
+        case 4: 
         case 9:
             printf("HELLO AVI");
             long long arr[] = {10,8,7,6,5};
-            int p[] = {1,2,2,4,5};
-            prepartition(arr, p, 5);
+            long long ret[5];
             for (int i = 0; i < 5; i++) {
-                printf("%lli    ", arr[i]);
+                ret[i] = arr[i];
             }
-            printf("%lli", karmarkar_karp(arr, 5));
+            int p[] = {1,2,2,4,5};
+            prepartition(ret, p, 5);
+            for (int i = 0; i < 5; i++) {
+                printf("%lli    ", ret[i]);
+            }
+            printf("%lli", karmarkar_karp(ret, 5));
     }
     return 0;
 }
