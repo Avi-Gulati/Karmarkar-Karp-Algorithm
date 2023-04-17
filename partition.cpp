@@ -40,7 +40,7 @@ long long karmarkar_karp(long long * arr, int length) {
         arr[max2index] = 0;
     }
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < length; i++) {
         if (arr[i] != 0) {
             return arr[i];
         }
@@ -152,6 +152,22 @@ long long simulated_anneal_standard(long long* A, int length, int max_iter) {
     return s2res;
 }
 
+void prepartition(long long arr[], int p[], int size) {
+    for (int i = 0; i < size; i++) {
+        int p_i = p[i];
+        if (p_i != -1) {
+            for (int j = i+1; j < size; j++) {
+                if (p[i] == p[j]) {
+                    arr[i] += arr[j];
+                    arr[j] = 0;
+                    p[j] = -1;
+                }
+            }
+        }
+    }
+}
+
+
 // partition flag algorithm inputfile
 int main(int _argc, char *argv[]) {
     int flag = stoi(argv[1]);
@@ -179,6 +195,15 @@ int main(int _argc, char *argv[]) {
         case 3:
             printf("%lli", simulated_anneal_standard(A, 100, max_iter));
             break;
+        case 9:
+            printf("HELLO AVI");
+            long long arr[] = {10,8,7,6,5};
+            int p[] = {1,2,2,4,5};
+            prepartition(arr, p, 5);
+            for (int i = 0; i < 5; i++) {
+                printf("%lli    ", arr[i]);
+            }
+            printf("%lli", karmarkar_karp(arr, 5));
     }
     return 0;
 }
