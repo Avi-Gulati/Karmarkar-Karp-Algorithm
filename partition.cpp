@@ -3,6 +3,7 @@
 #include <string>
 #include <random>
 #include <vector>
+#include <iterator>
 using namespace std;
 
 
@@ -42,8 +43,11 @@ void prepartition(long long ret[], int p[], int size) {
     }
 }
 
-long long karmarkar_karp(long long * arr, int length) {
-
+long long karmarkar_karp(long long * arr1, int length) {
+    long long arr[length];
+    for (int i = 0; i < length; i++) {
+        arr[i] = arr1[i];
+    }
     for (int i = 0; i < length - 1; i++) {
         long long max1;
         long long max2;
@@ -75,7 +79,7 @@ int* random_sol(int length) {
     return sol;
 }
 
-// generates random standard form solution of length "length"
+// generates random prepartition form solution of length "length"
 int* random_sol_prepartition(int length) {
     random_device rand_dev;
     mt19937 generator(rand_dev());
@@ -312,39 +316,75 @@ long long simulated_anneal_prepartition(long long* A, int length, int max_iter) 
 // partition flag algorithm inputfile
 int main(int _argc, char *argv[]) {
     int flag = stoi(argv[1]);
-    int algorithm = stoi(argv[2]);
     ifstream input(argv[3]);
-    
-    // initializes array A from input file
-    long long A[100];
-    for (int i = 0; i < 100; i++) {
-        string val;
-        getline(input, val);
-        A[i] = stoll(val);
-    }
-    int max_iter = 10000;
-    switch(algorithm) {
-        case 0:
-            printf("%lli", karmarkar_karp(A, 100));
-            break;
-        case 1:
-            printf("%lli", repeated_random_standard(A, 100, max_iter));
-            break;
-        case 2:
-            printf("%lli", hill_climb_standard(A, 100, max_iter));
-            break;
-        case 3:
-            printf("%lli", simulated_anneal_standard(A, 100, max_iter));
-            break;
-        case 11: 
-            printf("%lli", repeated_random_prepartition(A, 100, max_iter));
-            break;
-        case 12:
-            printf("%lli", hill_climb_prepartition(A, 100, max_iter));
-            break;
-        case 13:
-            printf("%lli", simulated_anneal_prepartition(A, 100, max_iter));
+    if (flag == 0) {
+        int algorithm = stoi(argv[2]);
+        
+        // initializes array A from input file
+        long long A[100];
+        for (int i = 0; i < 100; i++) {
+            string val;
+            getline(input, val);
+            A[i] = stoll(val);
+        }
+        int max_iter = 25000;
+        switch(algorithm) {
+            case 0:
+                printf("%lli", karmarkar_karp(A, 100));
+                break;
+            case 1:
+                printf("%lli", repeated_random_standard(A, 100, max_iter));
+                break;
+            case 2:
+                printf("%lli", hill_climb_standard(A, 100, max_iter));
+                break;
+            case 3:
+                printf("%lli", simulated_anneal_standard(A, 100, max_iter));
+                break;
+            case 11: 
+                printf("%lli", repeated_random_prepartition(A, 100, max_iter));
+                break;
+            case 12:
+                printf("%lli", hill_climb_prepartition(A, 100, max_iter));
+                break;
+            case 13:
+                printf("%lli", simulated_anneal_prepartition(A, 100, max_iter));
 
+        }
+        return 0;
+    } else {
+        // initialize all 50 random instances
+        int instances_num = 50;
+        int instance_length = 100;
+        long long instances[instances_num][instance_length];
+        for (int i = 0; i < instances_num; i++) {
+            for (int j = 0; j < instance_length; j++) {
+                string val;
+                getline(input, val);
+                instances[i][j] = stoll(val);
+            }
+        }
+        // run trials, collect results
+        long long results[instances_num][7];
+        for (int i = 0; i < instances_num; i++) {
+            int max_iter = 25000;
+            results[i][0] = karmarkar_karp(instances[i], instance_length);
+            results[i][1] = repeated_random_standard(instances[i], instance_length, max_iter);
+            results[i][2] = hill_climb_standard(instances[i], instance_length, max_iter);
+            results[i][3] = simulated_anneal_standard(instances[i], instance_length, max_iter);
+            results[i][4] = repeated_random_prepartition(instances[i], instance_length, max_iter);
+            results[i][5] = hill_climb_prepartition(instances[i], instance_length, max_iter);
+            results[i][6] = simulated_anneal_prepartition(instances[i], instance_length, max_iter);
+        }
+        // output to csv
+        ofstream outfile;
+        outfile.open("results.csv");
+        for (int i = 0; i < instances_num; i++) {
+            for (int j = 0; j < 7; j++) {
+                outfile << results[i][j] <<',';
+            }
+            outfile << '\n';
+        }
+        outfile.close();
     }
-    return 0;
 }

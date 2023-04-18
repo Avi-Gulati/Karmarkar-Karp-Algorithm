@@ -12,7 +12,7 @@ int main() {
     
     ofstream outfile;
     outfile.open("input.txt");
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 5000; i++) {
             outfile << to_string(dist(generator));
             outfile << "\n";
     }
